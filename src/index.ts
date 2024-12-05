@@ -2,6 +2,7 @@ import "dotenv/config";
 import { getKeypairFromEnvironment } from "@solana-developers/helpers";
 import axios from "axios";
 import {
+    AddressLookupTableAccount,
     Connection,
     PublicKey,
     VersionedTransaction,
@@ -38,6 +39,8 @@ function instructionFormat(instruction) {
         data: Buffer.from(instruction.data, 'base64')
     };
 }
+
+let addressLookupTables: { [key: string]: AddressLookupTableAccount[] } = {};
 
 async function run() {
 
@@ -127,7 +130,14 @@ async function run() {
         // ALT
         const addressLookupTableAccounts = await Promise.all(
             instructions.addressLookupTableAddresses.map(async (address) => {
+                if (addressLookupTables[address]) {
+                    return addressLookupTables[address];
+                }
+
                 const result = await connection.getAddressLookupTable(new PublicKey(address));
+                if (result.value) {
+                    addressLookupTables[address] = result.value;
+                }
                 return result.value;
             })
         );
