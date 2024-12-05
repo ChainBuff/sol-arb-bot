@@ -135,7 +135,9 @@ async function run() {
                 }
 
                 const result = await connection.getAddressLookupTable(new PublicKey(address));
-                addressLookupTables[address] = result.value;
+                if (result.value) {
+                    addressLookupTables[address] = result.value;
+                }
                 return result.value;
             })
         );
